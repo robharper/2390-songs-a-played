@@ -1,0 +1,2113 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+body {
+  font: 11px sans-serif;
+}
+h1 {
+  font-size: 16px;
+}
+h4 {
+  font-size: 12px;
+}
+#container {
+  position: relative;
+  width: 880px;
+}
+.arc {
+  stroke: none;
+}
+.circle {
+  stroke: silver;
+  stroke-width: 3px;
+  fill: silver;
+}
+.joint {
+  fill: silver;
+}
+.face:hover .circle, .face:hover .joint {
+  fill: gray;
+}
+#tooltip {
+  position: absolute;
+  padding: 0 10px 10px;
+  pointer-events: none;
+  text-align: left;
+  background-color: whitesmoke;
+  border-radius: 3px;
+  border: solid 1px #333;
+  width: 300px;
+  margin-left: -153px;
+  margin-top: 36px;
+}
+#tooltip.hidden {
+  display:none;
+}
+#tooltip:after {
+  bottom: 100%;
+  left: 50%;
+  border: solid transparent;
+  content: " ";
+  height: 0;
+  width: 0;
+  position: absolute;
+  pointer-events: none;
+  border-bottom-color: #333;
+  border-width: 10px;
+  margin-left: -10px;
+}
+#tooltip table {
+  width: 100%;
+}
+#tooltip h4 {
+  margin-bottom: 8px;
+}
+#tooltip table td {
+  padding-left: 0;
+}
+#tooltip .play-count {
+  float: right;
+  color: red;
+  font-weight: bold;
+}
+.axis path, .axis line {
+  fill: none;
+  stroke: #333;
+  shape-rendering: crispEdges;
+}
+.stem {
+  fill: #6631177f;
+}
+#title {
+  position: absolute;
+  top: 0;
+  left: 12px;
+  width: 250px;
+}
+</style>
+<body>
+  <div id="container">
+    <div id="title">
+      <h1>2390 Songs-a-Played</h1>
+      <p>
+        Songs played more than 10 times between Dec 17 and Dec 23 on Toronto's 
+        <a href="http://www.chfi.com/recently-played/">CHFI All-Christmas radio</a>.
+        Ornament decorative wedges show breakdown by artist. Hover for more details.
+      </p>
+      <p>
+        Data obtained through CHFI's <a href="http://newplayer.rogersradio.ca/CHFI/widget/recently_played">JSON API</a>, indexed into Elasticsearch, queried, and d3-ed. 
+        Visualization inspiration from The Pudding's <a href="https://pudding.cool/2017/02/vocabulary/">The Largest Vocabulary in Hip Hop</a>.
+      </p>
+    </div>
+  </div>
+  <div id="tooltip" class="hidden"></div>
+
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.js"></script>
+
+<script>
+var data = [
+        {
+          "key": "Winter Wonderland",
+          "doc_count": 65,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 5,
+            "buckets": [
+              {
+                "key": "Eurythmics",
+                "doc_count": 19
+              },
+              {
+                "key": "Tony Bennett",
+                "doc_count": 15
+              },
+              {
+                "key": "John Legend",
+                "doc_count": 4
+              },
+              {
+                "key": "Michael Buble",
+                "doc_count": 4
+              },
+              {
+                "key": "Sarah McLachlan",
+                "doc_count": 4
+              },
+              {
+                "key": "Air Supply",
+                "doc_count": 3
+              },
+              {
+                "key": "Amy Grant",
+                "doc_count": 3
+              },
+              {
+                "key": "Dean Martin",
+                "doc_count": 3
+              },
+              {
+                "key": "Leona Lewis",
+                "doc_count": 3
+              },
+              {
+                "key": "Aretha Franklin",
+                "doc_count": 2
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 13
+          }
+        },
+        {
+          "key": "Christmas (Baby Please Come Home)",
+          "doc_count": 58,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Mariah Carey",
+                "doc_count": 21
+              },
+              {
+                "key": "U2",
+                "doc_count": 19
+              },
+              {
+                "key": "Lady Antebellum",
+                "doc_count": 5
+              },
+              {
+                "key": "Leona Lewis",
+                "doc_count": 5
+              },
+              {
+                "key": "Andee",
+                "doc_count": 4
+              },
+              {
+                "key": "Melissa Etheridge",
+                "doc_count": 2
+              },
+              {
+                "key": "Michael Bublé",
+                "doc_count": 2
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 7
+          }
+        },
+        {
+          "key": "Let It Snow",
+          "doc_count": 52,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Frank Sinatra",
+                "doc_count": 14
+              },
+              {
+                "key": "Rankin, Heather, Cookie & Raylene",
+                "doc_count": 11
+              },
+              {
+                "key": "Sarah McLachlan",
+                "doc_count": 9
+              },
+              {
+                "key": "Gloria Estefan",
+                "doc_count": 5
+              },
+              {
+                "key": "Harry Connick. Jr.",
+                "doc_count": 5
+              },
+              {
+                "key": "Carly Rae Jepsen",
+                "doc_count": 4
+              },
+              {
+                "key": "Aaron Neville",
+                "doc_count": 2
+              },
+              {
+                "key": "SEAL",
+                "doc_count": 2
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 8
+          }
+        },
+        {
+          "key": "It's the Most Wonderful Time of the Year",
+          "doc_count": 51,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Andy Williams",
+                "doc_count": 21
+              },
+              {
+                "key": "Johnny Mathis",
+                "doc_count": 17
+              },
+              {
+                "key": "Amy Grant",
+                "doc_count": 6
+              },
+              {
+                "key": "Jann Arden",
+                "doc_count": 5
+              },
+              {
+                "key": "Matt Dusk",
+                "doc_count": 2
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 5
+          }
+        },
+        {
+          "key": "White Christmas",
+          "doc_count": 49,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Bing Crosby",
+                "doc_count": 18
+              },
+              {
+                "key": "Michael Buble Ft Shania Twain",
+                "doc_count": 6
+              },
+              {
+                "key": "Lara Fabian",
+                "doc_count": 5
+              },
+              {
+                "key": "Tony Bennett",
+                "doc_count": 5
+              },
+              {
+                "key": "Anne Murray",
+                "doc_count": 4
+              },
+              {
+                "key": "Gwen Stefani",
+                "doc_count": 3
+              },
+              {
+                "key": "Josh Groban",
+                "doc_count": 3
+              },
+              {
+                "key": "Roch Voisine",
+                "doc_count": 3
+              },
+              {
+                "key": "Destiny's Child",
+                "doc_count": 2
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 9
+          }
+        },
+        {
+          "key": "Sleigh Ride",
+          "doc_count": 48,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 1,
+            "buckets": [
+              {
+                "key": "Leroy Anderson",
+                "doc_count": 11
+              },
+              {
+                "key": "Harry Connick, Jr.",
+                "doc_count": 6
+              },
+              {
+                "key": "Johnny Mathis",
+                "doc_count": 6
+              },
+              {
+                "key": "Pentatonix",
+                "doc_count": 6
+              },
+              {
+                "key": "Roch Voisine",
+                "doc_count": 5
+              },
+              {
+                "key": "Amy Grant",
+                "doc_count": 4
+              },
+              {
+                "key": "Debbie Gibson",
+                "doc_count": 3
+              },
+              {
+                "key": "Ella Fitzgerald",
+                "doc_count": 3
+              },
+              {
+                "key": "KT Tunstall",
+                "doc_count": 2
+              },
+              {
+                "key": "Carpenters",
+                "doc_count": 1
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 11
+          }
+        },
+        {
+          "key": "The Christmas Song",
+          "doc_count": 48,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Nat \"King\" Cole",
+                "doc_count": 17
+              },
+              {
+                "key": "Sheryl Crow",
+                "doc_count": 8
+              },
+              {
+                "key": "SEAL",
+                "doc_count": 6
+              },
+              {
+                "key": "Jann Arden",
+                "doc_count": 4
+              },
+              {
+                "key": "Sarah McLachlan",
+                "doc_count": 4
+              },
+              {
+                "key": "Luther Vandross",
+                "doc_count": 3
+              },
+              {
+                "key": "Al Jarreau",
+                "doc_count": 2
+              },
+              {
+                "key": "Carpenters",
+                "doc_count": 2
+              },
+              {
+                "key": "Matt Dusk",
+                "doc_count": 1
+              },
+              {
+                "key": "Stevie Wonder",
+                "doc_count": 1
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 10
+          }
+        },
+        {
+          "key": "Have Yourself a Merry Little Christmas",
+          "doc_count": 47,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 4,
+            "buckets": [
+              {
+                "key": "Blue Rodeo",
+                "doc_count": 7
+              },
+              {
+                "key": "Sam Smith",
+                "doc_count": 6
+              },
+              {
+                "key": "Frank Sinatra",
+                "doc_count": 5
+              },
+              {
+                "key": "Train",
+                "doc_count": 5
+              },
+              {
+                "key": "Victoria Duffield",
+                "doc_count": 5
+              },
+              {
+                "key": "Colbie Caillat",
+                "doc_count": 4
+              },
+              {
+                "key": "The Tenors",
+                "doc_count": 4
+              },
+              {
+                "key": "James Taylor",
+                "doc_count": 3
+              },
+              {
+                "key": "Amy Grant",
+                "doc_count": 2
+              },
+              {
+                "key": "Christina Aguilera",
+                "doc_count": 2
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 13
+          }
+        },
+        {
+          "key": "Jingle Bell Rock",
+          "doc_count": 39,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Bobby Helms",
+                "doc_count": 23
+              },
+              {
+                "key": "Hall & Oates",
+                "doc_count": 14
+              },
+              {
+                "key": "Amy Grant",
+                "doc_count": 2
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 3
+          }
+        },
+        {
+          "key": "Last Christmas",
+          "doc_count": 39,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Wham!",
+                "doc_count": 14
+              },
+              {
+                "key": "Jesse Labelle",
+                "doc_count": 9
+              },
+              {
+                "key": "Glee Cast Version",
+                "doc_count": 5
+              },
+              {
+                "key": "Victoria Duffield",
+                "doc_count": 5
+              },
+              {
+                "key": "Ariana Grande",
+                "doc_count": 4
+              },
+              {
+                "key": "Taylor Swift",
+                "doc_count": 2
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 6
+          }
+        },
+        {
+          "key": "Santa Claus Is Coming to Town",
+          "doc_count": 38,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Frank Sinatra & Cyndi Lauper",
+                "doc_count": 21
+              },
+              {
+                "key": "The Pointer Sisters",
+                "doc_count": 17
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "Do You Hear What I Hear?",
+          "doc_count": 37,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Whitney Houston",
+                "doc_count": 27
+              },
+              {
+                "key": "Ali Slaight & Theo Tams",
+                "doc_count": 6
+              },
+              {
+                "key": "Bing Crosby",
+                "doc_count": 2
+              },
+              {
+                "key": "Jordin Sparks",
+                "doc_count": 2
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 4
+          }
+        },
+        {
+          "key": "This Christmas",
+          "doc_count": 35,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Seal",
+                "doc_count": 8
+              },
+              {
+                "key": "Lady Antebellum",
+                "doc_count": 7
+              },
+              {
+                "key": "Gloria Estefan",
+                "doc_count": 6
+              },
+              {
+                "key": "Train",
+                "doc_count": 6
+              },
+              {
+                "key": "Christina Aguilera",
+                "doc_count": 4
+              },
+              {
+                "key": "Mary J. Blige",
+                "doc_count": 4
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 6
+          }
+        },
+        {
+          "key": "It's Beginning to Look a Lot Like Christmas",
+          "doc_count": 34,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Bing Crosby",
+                "doc_count": 20
+              },
+              {
+                "key": "Jann Arden",
+                "doc_count": 6
+              },
+              {
+                "key": "Johnny Mathis",
+                "doc_count": 6
+              },
+              {
+                "key": "Noah Cyrus",
+                "doc_count": 2
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 4
+          }
+        },
+        {
+          "key": "Please Come Home for Christmas",
+          "doc_count": 34,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Eagles",
+                "doc_count": 24
+              },
+              {
+                "key": "Aaron Neville",
+                "doc_count": 5
+              },
+              {
+                "key": "Bon Jovi",
+                "doc_count": 5
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 3
+          }
+        },
+        {
+          "key": "Rockin' Around the Christmas Tree",
+          "doc_count": 32,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Brenda Lee",
+                "doc_count": 24
+              },
+              {
+                "key": "Amy Grant",
+                "doc_count": 4
+              },
+              {
+                "key": "LeAnn Rimes",
+                "doc_count": 4
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 3
+          }
+        },
+        {
+          "key": "Silver Bells",
+          "doc_count": 31,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Jann Arden",
+                "doc_count": 7
+              },
+              {
+                "key": "Lady Antebellum",
+                "doc_count": 7
+              },
+              {
+                "key": "Martina McBride",
+                "doc_count": 4
+              },
+              {
+                "key": "Roch Voisine",
+                "doc_count": 4
+              },
+              {
+                "key": "Sarah McLachlan",
+                "doc_count": 4
+              },
+              {
+                "key": "Stevie Wonder",
+                "doc_count": 3
+              },
+              {
+                "key": "The Supremes",
+                "doc_count": 2
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 7
+          }
+        },
+        {
+          "key": "All I Want For Christmas Is You",
+          "doc_count": 28,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Mariah Carey",
+                "doc_count": 24
+              },
+              {
+                "key": "Michael Bublé",
+                "doc_count": 4
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "Feliz Navidad",
+          "doc_count": 28,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "José Feliciano",
+                "doc_count": 28
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "Jingle Bells",
+          "doc_count": 28,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Gwen Stefani",
+                "doc_count": 8
+              },
+              {
+                "key": "Glee Cast Version",
+                "doc_count": 6
+              },
+              {
+                "key": "Frank Sinatra",
+                "doc_count": 5
+              },
+              {
+                "key": "Peggy Lee",
+                "doc_count": 5
+              },
+              {
+                "key": "Michael Buble Ft Puppini Sisters",
+                "doc_count": 4
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 5
+          }
+        },
+        {
+          "key": "I'll Be Home for Christmas",
+          "doc_count": 27,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Joee",
+                "doc_count": 7
+              },
+              {
+                "key": "The Tenors",
+                "doc_count": 6
+              },
+              {
+                "key": "Sheryl Crow",
+                "doc_count": 5
+              },
+              {
+                "key": "Amy Grant",
+                "doc_count": 3
+              },
+              {
+                "key": "Bing Crosby",
+                "doc_count": 3
+              },
+              {
+                "key": "Frank Sinatra",
+                "doc_count": 3
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 6
+          }
+        },
+        {
+          "key": "Little Saint Nick",
+          "doc_count": 27,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "The Beach Boys",
+                "doc_count": 27
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "Christmas Day",
+          "doc_count": 26,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Partland Brothers",
+                "doc_count": 15
+              },
+              {
+                "key": "Mcmaster & James",
+                "doc_count": 11
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "What Christmas Means to Me",
+          "doc_count": 26,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Paul Young",
+                "doc_count": 19
+              },
+              {
+                "key": "Train",
+                "doc_count": 7
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "Carol of the Bells",
+          "doc_count": 25,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "David Foster",
+                "doc_count": 20
+              },
+              {
+                "key": "Carpenters",
+                "doc_count": 4
+              },
+              {
+                "key": "Barenaked Ladies",
+                "doc_count": 1
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 3
+          }
+        },
+        {
+          "key": "Santa Baby",
+          "doc_count": 25,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Madonna",
+                "doc_count": 12
+              },
+              {
+                "key": "Eartha Kitt",
+                "doc_count": 7
+              },
+              {
+                "key": "Taylor Swift",
+                "doc_count": 4
+              },
+              {
+                "key": "Michael Bublé",
+                "doc_count": 2
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 4
+          }
+        },
+        {
+          "key": "Silent Night",
+          "doc_count": 25,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Suzie McNeil",
+                "doc_count": 9
+              },
+              {
+                "key": "Tyler Shaw",
+                "doc_count": 6
+              },
+              {
+                "key": "Ali & Theo",
+                "doc_count": 5
+              },
+              {
+                "key": "Taylor Swift",
+                "doc_count": 3
+              },
+              {
+                "key": "Take Three",
+                "doc_count": 2
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 5
+          }
+        },
+        {
+          "key": "Christmas Time Is Here",
+          "doc_count": 24,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Meaghan Smith",
+                "doc_count": 9
+              },
+              {
+                "key": "LeAnn Rimes",
+                "doc_count": 7
+              },
+              {
+                "key": "Shawn Colvin",
+                "doc_count": 5
+              },
+              {
+                "key": "Vince Guaraldi Trio",
+                "doc_count": 3
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 4
+          }
+        },
+        {
+          "key": "Wonderful Christmastime",
+          "doc_count": 24,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Paul Mccartney",
+                "doc_count": 24
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "Do They Know It's Christmas?",
+          "doc_count": 23,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Band Aid",
+                "doc_count": 20
+              },
+              {
+                "key": "Barenaked Ladies",
+                "doc_count": 3
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "Home For The Holidays",
+          "doc_count": 23,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Carpenters",
+                "doc_count": 23
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "I'll Be Home For Christmas",
+          "doc_count": 22,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Ali & Theo",
+                "doc_count": 9
+              },
+              {
+                "key": "Adam Gregory",
+                "doc_count": 6
+              },
+              {
+                "key": "Darius Rucker",
+                "doc_count": 4
+              },
+              {
+                "key": "Jordan Smith",
+                "doc_count": 3
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 4
+          }
+        },
+        {
+          "key": "Baby It's Cold Outside",
+          "doc_count": 21,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Virginia To Vegas W/Alyssa Reid",
+                "doc_count": 7
+              },
+              {
+                "key": "Holly Cole",
+                "doc_count": 6
+              },
+              {
+                "key": "Glee Cast Version",
+                "doc_count": 5
+              },
+              {
+                "key": "Dean Martin",
+                "doc_count": 3
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 4
+          }
+        },
+        {
+          "key": "Have a Holly Jolly Christmas",
+          "doc_count": 21,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Burl Ives",
+                "doc_count": 21
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "Driving Home for Christmas",
+          "doc_count": 20,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Chris Rea",
+                "doc_count": 20
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "I Saw Mommy Kissing Santa Claus",
+          "doc_count": 20,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "John Mellencamp",
+                "doc_count": 19
+              },
+              {
+                "key": "Jackson 5",
+                "doc_count": 1
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "Peace on Earth / Little Drummer Boy",
+          "doc_count": 20,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "David Bowie & Bing Crosby",
+                "doc_count": 20
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "Someday At Christmas",
+          "doc_count": 19,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Stevie Wonder",
+                "doc_count": 14
+              },
+              {
+                "key": "Rascal Flatts",
+                "doc_count": 5
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "O Come All Ye Faithful",
+          "doc_count": 18,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Luther Vandross",
+                "doc_count": 6
+              },
+              {
+                "key": "Sarah McLachlan",
+                "doc_count": 5
+              },
+              {
+                "key": "The Tenors",
+                "doc_count": 5
+              },
+              {
+                "key": "Frank Sinatra",
+                "doc_count": 2
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 4
+          }
+        },
+        {
+          "key": "River",
+          "doc_count": 18,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Robert Downey Jr.",
+                "doc_count": 9
+              },
+              {
+                "key": "Sarah McLachlan",
+                "doc_count": 9
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "Step Into Christmas",
+          "doc_count": 18,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Elton John",
+                "doc_count": 18
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "Happy Holidays / It's the Holiday Season (Live)",
+          "doc_count": 17,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Andy Williams",
+                "doc_count": 17
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "It's Beginning To Look a Lot Like Christmas",
+          "doc_count": 17,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Michael Bublé",
+                "doc_count": 17
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "2000 Miles",
+          "doc_count": 16,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Ali Slaight & Theo Tams",
+                "doc_count": 10
+              },
+              {
+                "key": "Pretenders",
+                "doc_count": 6
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "Blue Christmas",
+          "doc_count": 16,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "James Struthers",
+                "doc_count": 6
+              },
+              {
+                "key": "David Thibault",
+                "doc_count": 4
+              },
+              {
+                "key": "Elvis Presley",
+                "doc_count": 3
+              },
+              {
+                "key": "Florence K.",
+                "doc_count": 2
+              },
+              {
+                "key": "Michael Bublé",
+                "doc_count": 1
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 5
+          }
+        },
+        {
+          "key": "Mistletoe",
+          "doc_count": 16,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Justin Bieber",
+                "doc_count": 11
+              },
+              {
+                "key": "Colbie Caillat",
+                "doc_count": 5
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "Christmas Canon",
+          "doc_count": 15,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Trans-Siberian Orchestra",
+                "doc_count": 15
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "Christmas Must Be Tonight",
+          "doc_count": 15,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Robbie Robertson",
+                "doc_count": 8
+              },
+              {
+                "key": "Blue Rodeo",
+                "doc_count": 7
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "Have Yourself A Merry Little Christmas",
+          "doc_count": 15,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Ali Slaight & Theo Tams",
+                "doc_count": 8
+              },
+              {
+                "key": "Amanda Stott",
+                "doc_count": 3
+              },
+              {
+                "key": "David Archuleta",
+                "doc_count": 3
+              },
+              {
+                "key": "Kenny Loggins",
+                "doc_count": 1
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 4
+          }
+        },
+        {
+          "key": "Rudolph The Red Nosed Reindeer",
+          "doc_count": 15,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Wilson Sisters",
+                "doc_count": 7
+              },
+              {
+                "key": "Tony Bennett",
+                "doc_count": 5
+              },
+              {
+                "key": "Kacey Musgraves",
+                "doc_count": 2
+              },
+              {
+                "key": "Supremes",
+                "doc_count": 1
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 4
+          }
+        },
+        {
+          "key": "Rudolph the Red Nosed Reindeer",
+          "doc_count": 15,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Gene Autry",
+                "doc_count": 15
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "Little Drummer Boy",
+          "doc_count": 14,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Adam Gregory",
+                "doc_count": 6
+              },
+              {
+                "key": "Johnny Reid",
+                "doc_count": 4
+              },
+              {
+                "key": "Walk Off The Earth",
+                "doc_count": 4
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 3
+          }
+        },
+        {
+          "key": "Merry Christmas Baby",
+          "doc_count": 14,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Bruce Springsteen",
+                "doc_count": 8
+              },
+              {
+                "key": "Sheryl Crow",
+                "doc_count": 6
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "Run Rudolph Run",
+          "doc_count": 14,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Bryan Adams",
+                "doc_count": 10
+              },
+              {
+                "key": "Sheryl Crow",
+                "doc_count": 4
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "Hark! The Herald Angels Sing",
+          "doc_count": 13,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Carrie Underwood",
+                "doc_count": 8
+              },
+              {
+                "key": "Darius Rucker",
+                "doc_count": 5
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "Christmas Time",
+          "doc_count": 12,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Bryan Adams",
+                "doc_count": 12
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "Deck the Halls",
+          "doc_count": 12,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Pentatonix",
+                "doc_count": 7
+              },
+              {
+                "key": "Mannheim Steamroller",
+                "doc_count": 5
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "Do You Hear What I Hear",
+          "doc_count": 12,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Idina Menzel",
+                "doc_count": 6
+              },
+              {
+                "key": "Matt Dusk",
+                "doc_count": 6
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "Green Christmas",
+          "doc_count": 12,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Barenaked Ladies",
+                "doc_count": 12
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "I Wanna Be Your Christmas",
+          "doc_count": 12,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Andrew Allen",
+                "doc_count": 12
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "It Won't Be Christmas",
+          "doc_count": 12,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Emma-Lee",
+                "doc_count": 12
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "It's Christmas",
+          "doc_count": 12,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Tyler Shaw",
+                "doc_count": 12
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "Joy to the World",
+          "doc_count": 12,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Train",
+                "doc_count": 8
+              },
+              {
+                "key": "Pentatonix",
+                "doc_count": 4
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "Where Are You Christmas",
+          "doc_count": 12,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Ali Slaight & Theo Tams",
+                "doc_count": 6
+              },
+              {
+                "key": "Hill Faith",
+                "doc_count": 6
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "You're a Mean One, Mr. Grinch",
+          "doc_count": 12,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Darius Rucker",
+                "doc_count": 10
+              },
+              {
+                "key": "Thurl Ravenscroft",
+                "doc_count": 2
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "As Long As There's Christmas",
+          "doc_count": 11,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Aselin Debison",
+                "doc_count": 11
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "Can't Wait Til Christmas",
+          "doc_count": 11,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Jacksoul",
+                "doc_count": 11
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "Holly Jolly Christmas",
+          "doc_count": 11,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Faith Hill",
+                "doc_count": 8
+              },
+              {
+                "key": "Michael Bublé",
+                "doc_count": 3
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 2
+          }
+        },
+        {
+          "key": "How I Love This Time",
+          "doc_count": 11,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Justin Hines",
+                "doc_count": 11
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "Mele Kalikimaka",
+          "doc_count": 11,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Jimmy Buffett",
+                "doc_count": 11
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "Mittens",
+          "doc_count": 11,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "Carly Rae Jepsen",
+                "doc_count": 11
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        },
+        {
+          "key": "Santa's Wish (Teach the World)",
+          "doc_count": 11,
+          "top_artists": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "The Tenors",
+                "doc_count": 11
+              }
+            ]
+          },
+          "num_artists": {
+            "value": 1
+          }
+        }
+      ];
+
+
+
+
+// From Dan Shahin - http://jsfiddle.net/dshahin/9Vz5f/
+function findNearby(root, scaledX) {
+  var nearby = [];
+  root.visit(function(node, x1, y1, x2, y2) {
+    var p = node.point; 
+    if (p) {
+      var touching, x2 = yScale(p.doc_count);
+      if (x2 < scaledX) {
+        touching = (x2+RADIUS + padding >= scaledX - RADIUS);
+      } else {
+        touching = (scaledX + RADIUS + padding >= x2 - RADIUS);
+      }
+      if (touching) {
+        nearby.push(p);
+      } 
+    }
+    return (x1 - RADIUS > scaledX + RADIUS + padding) && (x2 + RADIUS < scaledX - RADIUS - padding) ;
+  });    
+  return nearby;
+}
+function calculateOffset(d){
+  neighbours = findNearby(quadroot, yScale(d.doc_count));
+  var n = neighbours.length;
+  var top = 0, bottom = 0;      
+  
+  if (n) {
+    var occupied = new Array(n), j = n;
+    while (j--) { 
+      var p = neighbours[j];
+      var hypoteneuse = RADIUS+RADIUS+padding; 
+      var base = yScale(d.doc_count) - yScale(p.doc_count); 
+      var vertical = Math.sqrt(Math.pow(hypoteneuse,2) -
+          Math.pow(base, 2));
+      occupied[j]=[p.offset+vertical, 
+                  p.offset-vertical];
+    }
+    occupied = occupied.sort(function(a,b){
+      return a[0] - b[0];
+    });
+    bottom = top = 1/0;//infinity
+        
+    j=n;
+    while (j--){
+      if (bottom > occupied[j][0]) {  
+          top = Math.min(bottom, occupied[j][0]);
+          bottom = occupied[j][1];
+      } else {
+          bottom = Math.min(bottom, occupied[j][1]);
+      }
+    }
+  }
+  return width/2 + (d.offset = (Math.abs(top) < Math.abs(bottom)) ? top : bottom);
+};
+
+var margin = {top: 25, right: 35, bottom: 30, left: 22},
+    width = 880 - margin.left - margin.right,
+    height = 700 - margin.top - margin.bottom,
+    RADIUS = 18,
+    padding = 4;
+
+var yScale = d3.scale.linear()
+    .range([0, height]);
+
+var yAxis = d3.svg.axis()
+    .scale(yScale)
+    .tickSize(5)
+    .orient('right');
+
+// var color = d3.scale.category20c();
+var color = d3.scale.ordinal().range([
+  '#738AA5',
+  '#B84133',
+  '#6F9179',
+  '#234158',
+  '#324F3A',
+  '#871b0f'
+]);
+
+var svg = d3.select('#container').append('svg')
+    .attr('width', width + margin.left + margin.right)
+    .attr('height', height + margin.top + margin.bottom)
+  .append('g')
+    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+var yExtent = d3.extent(data, function(d) { return d.doc_count; });
+yScale.domain([yExtent[1], yExtent[0]]).nice();
+
+svg.append("g")
+  .attr("class", "y axis")
+  .attr("transform", 'translate('+(width+15)+',0)')
+  .call(yAxis)
+
+svg.append("rect")
+  .attr("class", "stem")
+  .attr("x", width/2 - 4)
+  .attr("y", yScale(yExtent[1]))
+  .attr("height", height)
+  .attr('width', 8);
+
+var quadtree = d3.geom.quadtree()
+    .x(function(d) { return yScale(d.doc_count); }) 
+    .y(0)
+    .extent([[yScale(yExtent[1]),0],[yScale(yExtent[0]),0]]);
+var quadroot = quadtree([]);
+
+var pie = d3.layout.pie()
+    .sort(null)
+    .value(function(d) { return d.doc_count; });
+var path = d3.svg.arc()
+    .outerRadius(RADIUS)
+    .innerRadius(RADIUS-8);
+
+var tooltip = _.template(
+  '<h4><%= key %> <span class="play-count"><%= doc_count %> times</span></h4>' +
+  '<table>'+
+    '<% _.forEach(top_artists.buckets, function(artist) { %>' +
+      '<tr> <td><%= artist.key %></td> <td><%= artist.doc_count %></td> </tr>' +
+    '<% }) %>' +
+  '</table>'
+);
+
+var face = svg.selectAll('.face')
+  .data(data)
+  .enter()
+    .append('g')
+    .attr('class', 'face')
+    .attr('d-y', function(d) { return yScale(d.doc_count); })
+    .each(function(d) {
+      var xPos = calculateOffset(d);
+      d3.select(this)
+        .attr('d-x', xPos)
+        .attr('transform', 'translate('+xPos+','+yScale(d.doc_count)+')');
+      quadroot.add(d);
+    })
+    .on("mouseover", function(d) {
+      var xpos = parseFloat(d3.select(this).attr("d-x")) + margin.left;
+      var ypos = parseFloat(d3.select(this).attr("d-y")) + margin.top;
+      d3.select("#tooltip")
+        .style("left", Math.min(Math.max(xpos, 150), width-150) + "px")
+        .style("top", ypos + "px")
+          .html(tooltip(d))
+      d3.select("#tooltip").classed("hidden", false);
+    })
+    .on("mouseout", function() {
+      d3.select("#tooltip").classed("hidden", true);
+    });
+
+var circle = face.append('circle')
+  .attr('class', 'circle')
+  .attr('r', RADIUS)
+
+var joint = face.append('rect')
+  .attr('class', 'joint')
+  .attr('x', -5)
+  .attr('y', -RADIUS-5)
+  .attr('width', 10)
+  .attr('height', 10)
+
+var arc = face.selectAll(".arc")
+  .data(function(d) { 
+    return pie(d.top_artists.buckets); 
+  })
+  .enter().append("path")
+    .attr('class', 'arc')
+    .attr("d", path)
+    .attr("fill", function(d,i) { return color(d.data.key); });
+
+
+</script>
+</body>
+</html>
