@@ -2066,7 +2066,7 @@ var path = d3.svg.arc()
     .innerRadius(RADIUS-8);
 
 var tooltip = _.template(
-  '<h4><%= key %> <span class="play-count"><%= doc_count %> times</span></h4>' +
+  '<h4><%= key %> <span class="play-count"><%= doc_count %> plays</span></h4>' +
   '<table>'+
     '<% _.forEach(top_artists.buckets, function(artist) { %>' +
       '<tr> <td><%= artist.key %></td> <td><%= artist.doc_count %></td> </tr>' +
